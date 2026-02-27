@@ -1,0 +1,69 @@
+object SolutionHW1 {
+  def mergeSort[T](vector: Vector[T])(implicit ord: Ordering[T]): Vector[T] = {
+    def merge(
+        left: Vector[T],
+        right: Vector[T],
+        acc: Vector[T] = Vector.empty
+    ): Vector[T] = (left.headOption, right.headOption) match {
+      case (None, _) => acc ++ right
+      case (_, None) => acc ++ left
+      case (Some(l), Some(r)) =>
+        if (ord.lteq(l, r)) merge(left.tail, right, acc :+ l)
+        else merge(left, right.tail, acc :+ r)
+    }
+
+    val n = vector.length
+    if (n <= 1) vector
+    else {
+      val (left, right) = vector.splitAt(n / 2)
+      merge(mergeSort(left), mergeSort(right))
+    }
+  }
+
+  def mergeSortDistinct[T](vector: Vector[T])(implicit ord: Ordering[T]): Vector[T] = {
+    def merge(
+        left: Vector[T],
+        right: Vector[T],
+        last: Option[T] = None,
+        acc: Vector[T] = Vector.empty
+    ): Vector[T] = (left.headOption, right.headOption) match {
+      case (None, None) => acc
+      case (None, Some(r)) =>
+        if (last.contains(r)) merge(left, right.tail, last, acc)
+        else merge(left, right.tail, Some(r), acc :+ r)
+      case (Some(l), None) =>
+        if (last.contains(l)) merge(left.tail, right, last, acc)
+        else merge(left.tail, right, Some(l), acc :+ l)
+      case (Some(l), Some(r)) =>
+        val comparison = ord.compare(l, r)
+        if (comparison < 0) {
+          if (last.contains(l)) merge(left.tail, right, last, acc)
+          else merge(left.tail, right, Some(l), acc :+ l)
+        } else if (comparison > 0) {
+          if (last.contains(r)) merge(left, right.tail, last, acc)
+          else merge(left, right.tail, Some(r), acc :+ r)
+        } else { // l == r
+          if (last.contains(l)) merge(left.tail, right.tail, last, acc)
+          else merge(left.tail, right.tail, Some(l), acc :+ l)
+        }
+    }
+
+    val n = vector.length
+    if (n <= 1) vector
+    else {
+      val (left, right) = vector.splitAt(n / 2)
+      merge(mergeSort(left), mergeSort(right))
+    }
+  }
+
+  def main(args: Array[String]): Unit = {
+    val numbers = Vector(2, 1, 3, 3, 5, 4, 3)
+    println(s"Исходный вектор: $numbers")
+
+    val sorted = mergeSort(numbers)
+    println(s"Отсортированный вектор: $sorted")
+
+    val sortedDistinct = mergeSortDistinct(numbers)
+    println(s"Без дубликатов: $sortedDistinct")
+  }
+}
