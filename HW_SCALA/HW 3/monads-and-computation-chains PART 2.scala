@@ -26,7 +26,7 @@ object FoodOrderService {
   private def getActiveOrder(user: User): Option[Order] =
     orders.values.find(order => order.userId == user.id && order.status == "active")
 
-  // 3. Расчет скидки на основе суммы заказа
+  // 3. Расчёт скидки на основе суммы заказа
   private def calculateDiscount(order: Order): Either[String, Double] = {
     if (order.amount >= 500) {
       // Скидка 10% от суммы заказа
